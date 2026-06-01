@@ -220,7 +220,7 @@ function FluxoTable({ data }) {
 }
 
 // ─── SEÇÕES ───────────────────────────────────────────────────
-function Overview({ ver, setVer }) {
+function Overview({ ver }) {
   const d = computeMonths(ver, 'base');
   const be = d.find(r => r.isBreakEven)?.m ?? '—';
   const lm = Math.round(d.slice(12).reduce((s, r) => s + r.res, 0) / 24);
@@ -230,7 +230,6 @@ function Overview({ ver, setVer }) {
   return (
     <div>
       <SectionTitle title="Resumo executivo" sub="Lavanderia self-service de marca própria — sem franquia, sem royalties, sistema IoT próprio." />
-      <VerToggle ver={ver} onChange={setVer} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10, marginBottom: 24 }}>
         <MetricCard label="Investimento por sócio"      value={brl(INVEST[ver])}   sub="Desembolso inicial"           color="#F43F5E" />
         <MetricCard label="Parcela mensal (mês 1–12)"   value="R$ 3.851"            sub="Por sócio · 12 meses"         color="#FB923C" />
@@ -301,7 +300,7 @@ function Overview({ ver, setVer }) {
   );
 }
 
-function Investimento({ ver, setVer }) {
+function Investimento({ ver }) {
   const items = INV_ITEMS[ver];
   const sub = items.reduce((s, [, v]) => s + v, 0);
   const total = sub + 10000;
@@ -312,7 +311,6 @@ function Investimento({ ver, setVer }) {
   return (
     <div>
       <SectionTitle title="Investimento inicial" sub="Todo o capital dividido 50/50. Nenhum sócio tem isenção ou vantagem sobre o outro." />
-      <VerToggle ver={ver} onChange={setVer} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
         <Card>
           <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, color: '#94A3B8' }}>Itens — parte 1</h3>
@@ -563,7 +561,7 @@ function Sazonalidade() {
   );
 }
 
-function Fluxo({ ver, setVer }) {
+function Fluxo({ ver }) {
   const [sc, setSc] = useState('base');
   const data = computeMonths(ver, sc);
   const be = data.find(r => r.isBreakEven)?.m ?? '—';
@@ -573,7 +571,6 @@ function Fluxo({ ver, setVer }) {
   return (
     <div>
       <SectionTitle title="Fluxo de caixa mensal" sub="Valores por sócio (50%). Caixa acumulado parte do investimento inicial negativo." />
-      <VerToggle ver={ver} onChange={setVer} />
       <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
         {Object.entries(SCENARIO_META).map(([key, meta]) => (
           <button key={key} onClick={() => setSc(key)} style={{
@@ -599,7 +596,7 @@ function Fluxo({ ver, setVer }) {
   );
 }
 
-function Projecao({ ver, setVer }) {
+function Projecao({ ver }) {
   const data = computeMonths(ver, 'base');
   const be = data.find(r => r.isBreakEven)?.m ?? '—';
   const lm = Math.round(data.slice(12).reduce((s, r) => s + r.res, 0) / 24);
@@ -607,7 +604,6 @@ function Projecao({ ver, setVer }) {
   return (
     <div>
       <SectionTitle title="Projeção de lucro" sub="A partir do mês 13, parcelas acabam e o negócio entra em regime de cruzeiro." />
-      <VerToggle ver={ver} onChange={setVer} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10, marginBottom: 24 }}>
         <MetricCard label="Lucro médio mensal (mês 13+)"   value={`R$ ${lm.toLocaleString('pt-BR')}`}  sub="Por sócio · cenário base"    color="#10B981" />
         <MetricCard label="Lucro anual médio"               value={`R$ ${(lm*12).toLocaleString('pt-BR')}`} sub="Por sócio · pós break even" color="#10B981" />
@@ -694,7 +690,7 @@ function Projecao({ ver, setVer }) {
   );
 }
 
-function Grafico({ ver, setVer }) {
+function Grafico({ ver }) {
   const chartData = computeMonths(ver, 'base').map((b, i) => ({
     name: `M${b.m}`,
     base: b.acum,
@@ -706,7 +702,6 @@ function Grafico({ ver, setVer }) {
   return (
     <div>
       <SectionTitle title="Evolução do caixa acumulado" sub="Por sócio ao longo de 36 meses. Linha zero = break even acumulado (recuperação do investimento)." />
-      <VerToggle ver={ver} onChange={setVer} />
       <div style={{ display: 'flex', gap: 18, marginBottom: 14, flexWrap: 'wrap' }}>
         {[['Base','#10B981',''], ['Otimista','#3B82F6','6 3'], ['Conservador','#F43F5E','3 3']].map(([l, c, d]) => (
           <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13 }}>
@@ -803,7 +798,7 @@ const SECTIONS = [
 
 export default function App() {
   const [section, setSection] = useState('overview');
-  const [ver, setVer] = useState('e');
+  const [ver, setVer] = useState('i');
 
   return (
     <div style={S.app}>
@@ -816,10 +811,28 @@ export default function App() {
           </div>
           <p style={{ fontSize: 12, color: '#475569', marginTop: 3 }}>Peruíbe/SP · George Krajan Godas &amp; Jane · 50% / 50% · Confidencial</p>
         </div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 11, padding: '3px 10px', background: 'rgba(16,185,129,0.1)', color: '#10B981', borderRadius: 6, border: '1px solid rgba(16,185,129,0.2)' }}>3 Speed Queen Stacked</span>
-          <span style={{ fontSize: 11, padding: '3px 10px', background: 'rgba(59,130,246,0.1)', color: '#60A5FA', borderRadius: 6, border: '1px solid rgba(59,130,246,0.2)' }}>6 equipamentos independentes</span>
-          <span style={{ fontSize: 11, padding: '3px 10px', background: 'rgba(251,191,36,0.1)', color: '#FCD34D', borderRadius: 6, border: '1px solid rgba(251,191,36,0.2)' }}>Loja 5 — esquina</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', background: '#0F172A', border: '1px solid #1E293B', borderRadius: 10, padding: 4, gap: 4 }}>
+            {[
+              { k: 'e', label: 'Versão enxuta', color: '#10B981' },
+              { k: 'i', label: 'Versão ideal',  color: '#3B82F6' },
+            ].map(({ k, label, color }) => (
+              <button
+                key={k}
+                onClick={() => setVer(k)}
+                style={{
+                  padding: '7px 18px', borderRadius: 7, fontSize: 13, fontWeight: 600,
+                  cursor: 'pointer', border: 'none', transition: 'all .15s',
+                  background: ver === k ? color : 'transparent',
+                  color: ver === k ? '#fff' : '#64748B',
+                }}
+              >{label}</button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, padding: '3px 10px', background: 'rgba(16,185,129,0.1)', color: '#10B981', borderRadius: 6, border: '1px solid rgba(16,185,129,0.2)' }}>3 Speed Queen Stacked</span>
+            <span style={{ fontSize: 11, padding: '3px 10px', background: 'rgba(59,130,246,0.1)', color: '#60A5FA', borderRadius: 6, border: '1px solid rgba(59,130,246,0.2)' }}>6 equipamentos independentes</span>
+          </div>
         </div>
       </div>
 
@@ -836,13 +849,13 @@ export default function App() {
       </div>
 
       <div style={S.body}>
-        {section === 'overview'     && <Overview      ver={ver} setVer={setVer} />}
-        {section === 'investimento' && <Investimento  ver={ver} setVer={setVer} />}
+        {section === 'overview'     && <Overview      ver={ver} />}
+        {section === 'investimento' && <Investimento  ver={ver} />}
         {section === 'custos'       && <Custos />}
         {section === 'sazonalidade' && <Sazonalidade />}
-        {section === 'fluxo'        && <Fluxo         ver={ver} setVer={setVer} />}
-        {section === 'projecao'     && <Projecao      ver={ver} setVer={setVer} />}
-        {section === 'grafico'      && <Grafico       ver={ver} setVer={setVer} />}
+        {section === 'fluxo'        && <Fluxo         ver={ver} />}
+        {section === 'projecao'     && <Projecao      ver={ver} />}
+        {section === 'grafico'      && <Grafico       ver={ver} />}
         {section === 'riscos'       && <Riscos />}
       </div>
 
