@@ -14,7 +14,7 @@ const FIX_MES12 = 6015;
 const FIX_MES13 = 2165;
 
 const SEASONS_BASE = [
-  'B','B','B','M','M','A','A','A','M','M','A','A',
+  'R','R','R','M','M','A','A','A','M','M','A','A',
   'A','B','B','B','M','M','A','A','A','M','M','A',
   'A','B','B','B','M','M','A','A','A','M','M','A'
 ];
@@ -48,6 +48,7 @@ const brlS = (v) => (v >= 0 ? '+ ' : '– ') + 'R$ ' + Math.abs(Math.round(v)).t
 
 function getUsos(s, sc) {
   if (sc === 'ot') return { lav: 13, sec: 11 };
+  if (s === 'R')   return { lav: 2,  sec: 3  };
   if (s === 'A')   return { lav: 10, sec: 8  };
   if (s === 'M')   return { lav: 6,  sec: 5  };
   return { lav: 3, sec: 5 };
@@ -69,7 +70,7 @@ function computeMonths(sc) {
     acum = Math.round(acum + res);
     return {
       m, s,
-      sl: s === 'A' ? 'Alta' : s === 'M' ? 'Média' : 'Baixa',
+      sl: s === 'A' ? 'Alta' : s === 'M' ? 'Média' : s === 'R' ? 'Abertura' : 'Baixa',
       ul, us, rec, cv, fix,
       res: Math.round(res), acum,
       isBreakEven: prev < 0 && acum >= 0,
@@ -160,8 +161,8 @@ function FluxoTable({ data }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                   <span style={{
                     fontSize: 10, padding: '2px 7px', borderRadius: 4, fontWeight: 600,
-                    background: row.s === 'A' ? 'rgba(251,191,36,0.15)' : row.s === 'M' ? 'rgba(99,102,241,0.15)' : 'rgba(100,116,139,0.15)',
-                    color: row.s === 'A' ? '#FCD34D' : row.s === 'M' ? '#818CF8' : '#94A3B8',
+                    background: row.s === 'A' ? 'rgba(251,191,36,0.15)' : row.s === 'M' ? 'rgba(99,102,241,0.15)' : row.s === 'R' ? 'rgba(251,146,60,0.15)' : 'rgba(100,116,139,0.15)',
+                    color: row.s === 'A' ? '#FCD34D' : row.s === 'M' ? '#818CF8' : row.s === 'R' ? '#FB923C' : '#94A3B8',
                   }}>{row.sl}</span>
                   {row.isMilestone13 && <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'rgba(59,130,246,0.2)', color: '#60A5FA', fontWeight: 600 }}>sem parcelas</span>}
                   {row.isBreakEven  && <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'rgba(16,185,129,0.25)', color: '#34D399', fontWeight: 600 }}>break even ✓</span>}
