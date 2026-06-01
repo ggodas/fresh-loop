@@ -9,9 +9,9 @@ const PRICE = 16;
 const LAV_COST = 2.12;
 const SEC_COST = 1.95;
 
-const INVEST = { e: 30254, i: 39469 };
-const FIX_MES12 = { e: 6015, i: 6015 };
-const FIX_MES13 = { e: 2165, i: 2165 };
+const INVEST = 39469;
+const FIX_MES12 = 6015;
+const FIX_MES13 = 2165;
 
 const SEASONS_BASE = [
   'B','B','B','M','M','A','A','A','M','M','A','A',
@@ -19,38 +19,22 @@ const SEASONS_BASE = [
   'A','B','B','B','M','M','A','A','A','M','M','A'
 ];
 
-const INV_ITEMS = {
-  e: [
-    ['Entrada 3 Speed Queen Stacked', 23100, false],
-    ['Instalação elétrica + hidráulica', 4000, true],
-    ['Reforma (pintura + reparação parede)', 4000, true],
-    ['Drywall nicho máquinas', 2000, true],
-    ['Kit Intelbras 6 câmeras + DVR + HD', 3200, false],
-    ['Box Payblu (controlador 3 máquinas)', 1799, false],
-    ['Moderninha PagBank (12× R$ 24,90)', 299, false],
-    ['Mobiliário (2 longarinas + mesa dobrar)', 2000, false],
-    ['Sinalização + identidade visual', 5000, false],
-    ['Prateleiras sala utilidades', 300, false],
-    ['Galões iniciais Omo Pro + Confort Pro', 1440, false],
-    ['Imprevistos (5%)', 3369, false],
-  ],
-  i: [
-    ['Entrada 3 Speed Queen Stacked', 23100, false],
-    ['Instalação elétrica + hidráulica', 4000, true],
-    ['Reforma (pintura + reparação parede)', 6000, true],
-    ['Drywall nicho máquinas', 2000, true],
-    ['Fachada (2 vitrines + 2 portas IoT)', 10400, true],
-    ['A/C 24.000 BTU + instalação', 4400, false],
-    ['Kit Intelbras 6 câmeras + DVR + HD', 3200, false],
-    ['Box Payblu (controlador 3 máquinas)', 1799, false],
-    ['Moderninha PagBank (12× R$ 24,90)', 299, false],
-    ['Mobiliário (2 longarinas + mesa dobrar)', 2000, false],
-    ['Sinalização + identidade visual', 5000, false],
-    ['Prateleiras sala utilidades', 300, false],
-    ['Galões iniciais Omo Pro + Confort Pro', 1440, false],
-    ['Imprevistos (5%)', 5000, false],
-  ]
-};
+const INV_ITEMS = [
+  ['Entrada 3 Speed Queen Stacked', 23100, false],
+  ['Instalação elétrica + hidráulica', 4000, true],
+  ['Reforma (pintura + reparação parede)', 6000, true],
+  ['Drywall nicho máquinas', 2000, true],
+  ['Fachada (2 vitrines + 2 portas IoT)', 10400, true],
+  ['A/C 24.000 BTU + instalação', 4400, false],
+  ['Kit Intelbras 6 câmeras + DVR + HD', 3200, false],
+  ['Box Payblu (controlador 3 máquinas)', 1799, false],
+  ['Moderninha PagBank (12× R$ 24,90)', 299, false],
+  ['Mobiliário (2 longarinas + mesa dobrar)', 2000, false],
+  ['Sinalização + identidade visual', 5000, false],
+  ['Prateleiras sala utilidades', 300, false],
+  ['Galões iniciais Omo Pro + Confort Pro', 1440, false],
+  ['Imprevistos (5%)', 5000, false],
+];
 
 const SCENARIO_META = {
   base: { label: 'Cenário base',   color: '#10B981', desc: 'Sazonalidade real de Peruíbe — alta em Dez–Fev, média em Mar/Jul/Out/Nov, baixa nos demais.' },
@@ -69,9 +53,9 @@ function getUsos(s, sc) {
   return { lav: 3, sec: 5 };
 }
 
-function computeMonths(ver, sc) {
+function computeMonths(sc) {
   const seasons = sc === 'ot' ? Array(36).fill('A') : sc === 'pe' ? Array(36).fill('B') : SEASONS_BASE;
-  let acum = -INVEST[ver];
+  let acum = -INVEST;
   return seasons.map((s, i) => {
     const m = i + 1;
     const { lav, sec } = getUsos(s, sc);
@@ -79,7 +63,7 @@ function computeMonths(ver, sc) {
     const us = sec * 3 * 30;
     const rec = Math.round((ul + us) * PRICE / 2);
     const cv  = Math.round((ul * LAV_COST + us * SEC_COST) / 2);
-    const fix = m <= 12 ? FIX_MES12[ver] : FIX_MES13[ver];
+    const fix = m <= 12 ? FIX_MES12 : FIX_MES13;
     const res = rec - cv - fix;
     const prev = acum;
     acum = Math.round(acum + res);
@@ -220,8 +204,8 @@ function FluxoTable({ data }) {
 }
 
 // ─── SEÇÕES ───────────────────────────────────────────────────
-function Overview({ ver }) {
-  const d = computeMonths(ver, 'base');
+function Overview() {
+  const d = computeMonths('base');
   const be = d.find(r => r.isBreakEven)?.m ?? '—';
   const lm = Math.round(d.slice(12).reduce((s, r) => s + r.res, 0) / 24);
   const maxExp = Math.min(...d.map(r => r.acum));
@@ -231,26 +215,20 @@ function Overview({ ver }) {
     <div>
       <SectionTitle title="Resumo executivo" sub="Lavanderia self-service de marca própria — sem franquia, sem royalties, sistema IoT próprio." />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10, marginBottom: 24 }}>
-        <MetricCard label="Investimento por sócio"      value={brl(INVEST[ver])}   sub="Desembolso inicial"           color="#F43F5E" />
-        <MetricCard label="Parcela mensal (mês 1–12)"   value="R$ 3.851"            sub="Por sócio · 12 meses"         color="#FB923C" />
-        <MetricCard label="Exposição máxima ano 1"      value={brl(maxExp)}         sub="Pior momento do caixa"        color="#FBBF24" />
-        <MetricCard label="Meses resultado negativo"    value={`~${negM} meses`}    sub="Cenário base"                 color="#A78BFA" />
-        <MetricCard label="Break even acumulado"        value={`~mês ${be}`}        sub="Cenário base"                 color="#10B981" />
+        <MetricCard label="Investimento por sócio"      value={brl(INVEST)}            sub="Desembolso inicial"           color="#F43F5E" />
+        <MetricCard label="Parcela mensal (mês 1–12)"   value="R$ 3.851"               sub="Por sócio · 12 meses"         color="#FB923C" />
+        <MetricCard label="Exposição máxima ano 1"      value={brl(maxExp)}            sub="Pior momento do caixa"        color="#FBBF24" />
+        <MetricCard label="Meses resultado negativo"    value={`~${negM} meses`}       sub="Cenário base"                 color="#A78BFA" />
+        <MetricCard label="Break even acumulado"        value={`~mês ${be}`}           sub="Cenário base"                 color="#10B981" />
         <MetricCard label="Lucro médio pós break even"  value={`R$ ${lm.toLocaleString('pt-BR')}`} sub="Por sócio / mês (mês 13+)" color="#10B981" />
-        <MetricCard label="Lucro anual pós break even"  value={`R$ ${(lm*12).toLocaleString('pt-BR')}`} sub="Por sócio / ano"     color="#10B981" />
-        <MetricCard label="ROI acumulado (36 meses)"    value="~149%"               sub="Sobre capital investido"      color="#3B82F6" />
+        <MetricCard label="Lucro anual pós break even"  value={`R$ ${(lm*12).toLocaleString('pt-BR')}`} sub="Por sócio / ano"  color="#10B981" />
+        <MetricCard label="ROI acumulado (36 meses)"    value="~197%"                  sub="Sobre capital investido"      color="#3B82F6" />
       </div>
 
-      <div style={{ background: ver === 'e' ? 'rgba(16,185,129,0.07)' : 'rgba(59,130,246,0.07)', border: `1px solid ${ver === 'e' ? 'rgba(16,185,129,0.2)' : 'rgba(59,130,246,0.2)'}`, borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
-        {ver === 'e' ? (
-          <p style={{ fontSize: 13, color: '#A7F3D0', lineHeight: 1.75, margin: 0 }}>
-            <strong>Versão enxuta:</strong> sem fachada de vidro, sem A/C. Portas de ferro existentes ficam abertas durante o funcionamento. Horário limitado (~7h–22h). Foco em validar o mercado com menor capital inicial. Diferença por sócio vs versão ideal: <strong>R$ 9.215 a menos</strong>.
-          </p>
-        ) : (
-          <p style={{ fontSize: 13, color: '#BFDBFE', lineHeight: 1.75, margin: 0 }}>
-            <strong>Versão ideal:</strong> 2 vitrines fixas + 2 portas de vidro com IoT (fechamento automático), A/C 24.000 BTU, operação potencialmente autônoma em horário estendido. Investimento adicional por sócio vs enxuta: <strong>R$ 9.215</strong>.
-          </p>
-        )}
+      <div style={{ background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
+        <p style={{ fontSize: 13, color: '#BFDBFE', lineHeight: 1.75, margin: 0 }}>
+          Fachada com 2 vitrines fixas + 2 portas de vidro com trava eletromagnética IoT (abertura e fechamento remoto), A/C 24.000 BTU e operação autônoma em horário estendido. Sistema IoT próprio (ESP32 + Azure IoT Hub) em desenvolvimento paralelo — migração do Vendpago planejada.
+        </p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
@@ -300,8 +278,8 @@ function Overview({ ver }) {
   );
 }
 
-function Investimento({ ver }) {
-  const items = INV_ITEMS[ver];
+function Investimento() {
+  const items = INV_ITEMS;
   const sub = items.reduce((s, [, v]) => s + v, 0);
   const total = sub + 10000;
   const mid = Math.ceil(items.length / 2);
@@ -347,7 +325,7 @@ function Investimento({ ver }) {
       </div>
       <div style={{ background: 'rgba(251,146,60,0.07)', border: '1px solid rgba(251,146,60,0.2)', borderRadius: 10, padding: '14px 18px' }}>
         <p style={{ fontSize: 13, color: '#FED7AA', lineHeight: 1.75, margin: 0 }}>
-          <strong>* Estimativas sem orçamento formal:</strong> instalação elétrica/hidráulica, reforma, drywall{ver === 'i' ? ' e fachada' : ''}. Recomenda-se obter pelo menos 1 orçamento real de cada antes de assinar o contrato de locação.
+          <strong>* Estimativas sem orçamento formal:</strong> instalação elétrica/hidráulica, reforma, drywall e fachada. Recomenda-se obter pelo menos 1 orçamento real de cada antes de assinar o contrato de locação.
         </p>
       </div>
     </div>
@@ -561,9 +539,9 @@ function Sazonalidade() {
   );
 }
 
-function Fluxo({ ver }) {
+function Fluxo() {
   const [sc, setSc] = useState('base');
-  const data = computeMonths(ver, sc);
+  const data = computeMonths(sc);
   const be = data.find(r => r.isBreakEven)?.m ?? '—';
   const maxExp = Math.min(...data.map(r => r.acum));
   const lm = Math.round(data.slice(12).reduce((s, r) => s + r.res, 0) / 24);
@@ -596,8 +574,8 @@ function Fluxo({ ver }) {
   );
 }
 
-function Projecao({ ver }) {
-  const data = computeMonths(ver, 'base');
+function Projecao() {
+  const data = computeMonths('base');
   const be = data.find(r => r.isBreakEven)?.m ?? '—';
   const lm = Math.round(data.slice(12).reduce((s, r) => s + r.res, 0) / 24);
 
@@ -608,7 +586,7 @@ function Projecao({ ver }) {
         <MetricCard label="Lucro médio mensal (mês 13+)"   value={`R$ ${lm.toLocaleString('pt-BR')}`}  sub="Por sócio · cenário base"    color="#10B981" />
         <MetricCard label="Lucro anual médio"               value={`R$ ${(lm*12).toLocaleString('pt-BR')}`} sub="Por sócio · pós break even" color="#10B981" />
         <MetricCard label="Break even acumulado (base)"     value={`~mês ${be}`}                        sub="Recuperação do capital"      color="#A78BFA" />
-        <MetricCard label="ROI acumulado (36 meses)"        value="~149%"                               sub="Sobre capital investido"     color="#3B82F6" />
+        <MetricCard label="ROI acumulado (36 meses)"        value="~197%"                               sub="Sobre capital investido"     color="#3B82F6" />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
@@ -625,7 +603,7 @@ function Projecao({ ver }) {
         <Card>
           <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: '#94A3B8' }}>Comparativo por cenário (mês 13+)</h3>
           {Object.entries(SCENARIO_META).map(([key, meta]) => {
-            const d = computeMonths(ver, key);
+            const d = computeMonths(key);
             const bbe = d.find(r => r.isBreakEven)?.m ?? '—';
             const llm = Math.round(d.slice(12).reduce((s, r) => s + r.res, 0) / 24);
             return (
@@ -667,7 +645,7 @@ function Projecao({ ver }) {
               const ul = lav*3*30, us = sec*3*30;
               const rec = Math.round((ul+us)*PRICE/2);
               const cv  = Math.round((ul*LAV_COST+us*SEC_COST)/2);
-              const fix = FIX_MES13[ver];
+              const fix = FIX_MES13;
               const luc = rec - cv - fix;
               return (
                 <tr key={p} style={{ borderBottom: '1px solid #0F172A' }}>
@@ -690,14 +668,14 @@ function Projecao({ ver }) {
   );
 }
 
-function Grafico({ ver }) {
-  const chartData = computeMonths(ver, 'base').map((b, i) => ({
+function Grafico() {
+  const chartData = computeMonths('base').map((b, i) => ({
     name: `M${b.m}`,
     base: b.acum,
-    ot:   computeMonths(ver, 'ot')[i].acum,
-    pe:   computeMonths(ver, 'pe')[i].acum,
+    ot:   computeMonths('ot')[i].acum,
+    pe:   computeMonths('pe')[i].acum,
   }));
-  chartData.unshift({ name: 'Aber', base: -INVEST[ver], ot: -INVEST[ver], pe: -INVEST[ver] });
+  chartData.unshift({ name: 'Aber', base: -INVEST, ot: -INVEST, pe: -INVEST });
 
   return (
     <div>
@@ -726,7 +704,7 @@ function Grafico({ ver }) {
       </Card>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
         {Object.entries(SCENARIO_META).map(([key, meta]) => {
-          const d = computeMonths(ver, key);
+          const d = computeMonths(key);
           const be = d.find(r => r.isBreakEven)?.m ?? '—';
           const lm = Math.round(d.slice(12).reduce((s, r) => s + r.res, 0) / 24);
           const minAcum = Math.min(...d.map(r => r.acum));
@@ -754,14 +732,24 @@ function Grafico({ ver }) {
 
 function Riscos() {
   const riscos = [
-    { r: 'Baixa adesão nos primeiros meses',         p: 'Média', c: '#FBBF24', m: 'Capital de giro incluso no plano. Break even operacional baixo (2,3 usos/equipamento/dia). Peruíbe não tem concorrente local — ausência de oferta é uma vantagem.' },
-    { r: 'Manutenção inesperada de máquina',          p: 'Média', c: '#FBBF24', m: 'Speed Queen: vida útil 10–15 anos em uso comercial intensivo. Peças disponíveis no Brasil via Alliance Laundry Systems. Custo atribuído ao proprietário da máquina — não socializa o risco.' },
-    { r: 'Aumento da tarifa de energia elétrica',     p: 'Baixa', c: '#10B981', m: 'Totalmente repassável via ajuste de preço — sem franquia para restringir. Margem bruta de R$ 13,97/uso absorve aumentos moderados antes de precisar reajuste.' },
-    { r: 'Concorrência de franquia no raio',          p: 'Baixa', c: '#10B981', m: 'Sem royalty + precificação dinâmica por temporada + identidade local. Sistema IoT próprio reduzirá custo operacional vs franquias no longo prazo.' },
-    { r: 'Inadimplência no financiamento da máquina', p: 'Baixa', c: '#10B981', m: 'Cada sócio assina e financia sua própria máquina individualmente. Inadimplência de um não afeta o financiamento do outro.' },
-    { r: 'Dano em roupas de cliente (CDC Art. 14)',   p: 'Baixa', c: '#10B981', m: 'Câmeras Intelbras documentam estado das roupas antes/depois. Dosador peristáltico bypassa o dispenser — elimina principal vetor de mancha. Ciclo quente não oferecido no MVP.' },
-    { r: 'Falha no sistema Vendpago',                 p: 'Baixa', c: '#10B981', m: 'Sistema interim. Plano de migração para IoT próprio (ESP32 + Azure IoT Hub) já definido. Start Pulse especificado como item crítico de contrato antes de assinar.' },
-    { r: 'Disputa societária',                        p: 'Baixa', c: '#10B981', m: 'Cláusula de saída definida: 90 dias de prazo, não-concorrência de 12 meses em raio de 2km em Peruíbe. Só máquinas são reembolsáveis — instalações e reformas são ativo permanente.' },
+    { r: 'Concorrência local estabelecida',
+      p: 'Média', c: '#FBBF24',
+      m: 'Existem 2 concorrentes no mesmo quarteirão e aproximadamente 7 lavanderias na cidade. Mitigação: localização de esquina com duas frentes garante maior visibilidade e fluxo de pedestres. Diferenciais adicionais: sistema de pagamento moderno, identidade visual própria e precificação dinâmica por temporada.' },
+    { r: 'Baixa adesão nos primeiros meses',
+      p: 'Média', c: '#FBBF24',
+      m: 'Capital de giro incluso no plano cobre o período de déficit inicial. Break even operacional é baixo (2,3 usos/equipamento/dia). Ramp-up esperado de 2–3 meses até o público local incorporar o hábito.' },
+    { r: 'Manutenção inesperada de máquina',
+      p: 'Média', c: '#FBBF24',
+      m: 'Speed Queen: vida útil de 10–15 anos em uso comercial intensivo. Peças disponíveis no Brasil via Alliance Laundry Systems. Qualquer custo de manutenção é compartilhado entre os sócios — impacta os dois.' },
+    { r: 'Aumento da tarifa de energia elétrica',
+      p: 'Baixa', c: '#10B981',
+      m: 'Totalmente repassável via ajuste de preço — sem franquia para restringir. Margem bruta de R$ 13,97/uso absorve aumentos moderados antes de precisar reajustar o valor cobrado.' },
+    { r: 'Dano em roupas de cliente (CDC Art. 14)',
+      p: 'Baixa', c: '#10B981',
+      m: 'Câmeras Intelbras documentam o estado das roupas antes e depois. Dosador peristáltico bypassa o dispenser — elimina o principal vetor de mancha por resíduo. Ciclo quente não oferecido no MVP.' },
+    { r: 'Falha no sistema Vendpago',
+      p: 'Baixa', c: '#10B981',
+      m: 'Sistema interim com plano de migração definido. IoT próprio (ESP32 + Azure IoT Hub) já arquitetado. Especificação elétrica do Start Pulse é item crítico a ser confirmado antes de assinar contrato.' },
   ];
 
   return (
@@ -798,7 +786,6 @@ const SECTIONS = [
 
 export default function App() {
   const [section, setSection] = useState('overview');
-  const [ver, setVer] = useState('i');
 
   return (
     <div style={S.app}>
@@ -812,23 +799,6 @@ export default function App() {
           <p style={{ fontSize: 12, color: '#475569', marginTop: 3 }}>Peruíbe/SP · George Krajan Godas &amp; Jane · 50% / 50% · Confidencial</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', background: '#0F172A', border: '1px solid #1E293B', borderRadius: 10, padding: 4, gap: 4 }}>
-            {[
-              { k: 'e', label: 'Versão enxuta', color: '#10B981' },
-              { k: 'i', label: 'Versão ideal',  color: '#3B82F6' },
-            ].map(({ k, label, color }) => (
-              <button
-                key={k}
-                onClick={() => setVer(k)}
-                style={{
-                  padding: '7px 18px', borderRadius: 7, fontSize: 13, fontWeight: 600,
-                  cursor: 'pointer', border: 'none', transition: 'all .15s',
-                  background: ver === k ? color : 'transparent',
-                  color: ver === k ? '#fff' : '#64748B',
-                }}
-              >{label}</button>
-            ))}
-          </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 11, padding: '3px 10px', background: 'rgba(16,185,129,0.1)', color: '#10B981', borderRadius: 6, border: '1px solid rgba(16,185,129,0.2)' }}>3 Speed Queen Stacked</span>
             <span style={{ fontSize: 11, padding: '3px 10px', background: 'rgba(59,130,246,0.1)', color: '#60A5FA', borderRadius: 6, border: '1px solid rgba(59,130,246,0.2)' }}>6 equipamentos independentes</span>
@@ -849,13 +819,13 @@ export default function App() {
       </div>
 
       <div style={S.body}>
-        {section === 'overview'     && <Overview      ver={ver} />}
-        {section === 'investimento' && <Investimento  ver={ver} />}
+        {section === 'overview'     && <Overview />}
+        {section === 'investimento' && <Investimento />}
         {section === 'custos'       && <Custos />}
         {section === 'sazonalidade' && <Sazonalidade />}
-        {section === 'fluxo'        && <Fluxo         ver={ver} />}
-        {section === 'projecao'     && <Projecao      ver={ver} />}
-        {section === 'grafico'      && <Grafico       ver={ver} />}
+        {section === 'fluxo'        && <Fluxo />}
+        {section === 'projecao'     && <Projecao />}
+        {section === 'grafico'      && <Grafico />}
         {section === 'riscos'       && <Riscos />}
       </div>
 
