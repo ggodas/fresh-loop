@@ -113,27 +113,6 @@ function SectionTitle({ title, sub }) {
   );
 }
 
-function VerToggle({ ver, onChange, ids }) {
-  return (
-    <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-      {[
-        { k: 'e', label: 'Versão enxuta',  color: '#10B981' },
-        { k: 'i', label: 'Versão ideal',   color: '#3B82F6' },
-      ].map(({ k, label, color }) => (
-        <button
-          key={k}
-          onClick={() => onChange(k)}
-          style={{
-            padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-            cursor: 'pointer', border: `1.5px solid ${ver === k ? color : '#1E293B'}`,
-            background: ver === k ? color + '20' : 'transparent',
-            color: ver === k ? color : '#475569', transition: 'all .15s',
-          }}
-        >{label}</button>
-      ))}
-    </div>
-  );
-}
 
 function LineItem({ label, value, valueColor = '#F43F5E', bold = false, note = '' }) {
   return (
@@ -241,7 +220,7 @@ function Overview() {
             'Bomba peristáltica inclusa nas máquinas (Vendpago)',
             'Box Payblu controla máquinas e dosador',
             'Sistema IoT próprio planejado (pós-MVP)',
-            ver === 'i' ? 'Portas automáticas via IoT (abre/fecha remoto)' : 'Portas de ferro como segurança fallback',
+            'Portas automáticas via IoT (abre/fecha remoto)',
             'Câmera Intelbras como prova documental',
             'Fachada de esquina — visibilidade dupla',
           ].map(d => (
